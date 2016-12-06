@@ -28,6 +28,11 @@ async function main(port) {
       process.env.GHOSTWRITER_APP_URL
         ? process.env.GHOSTWRITER_APP_URL
         : `http://localhost:${port}`,
+    sitemaps: [
+      process.env.GHOSTWRITER_APP_URL
+        ? process.env.GHOSTWRITER_APP_URL+'/sitemap.xml'
+        : `http://localhost:${port}/sitemap.xml`
+    ]
   }));
 
   // frontend
