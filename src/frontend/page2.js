@@ -1,7 +1,7 @@
 import * as ghostwriter from 'ghostwriter-apptool';
 import DocumentMeta from 'react-document-meta';
 
-export default class Page0 extends React.Component {
+export default class Page2 extends React.Component {
 
   constructor(props) {
     super(props);
