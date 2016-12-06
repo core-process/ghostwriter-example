@@ -1,0 +1,122 @@
+# setup the machine for docker
+# install docker 1.10 on the ci machine
+machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+
+  # run docker
+  services:
+    - docker
+
+  # set the docker registry
+  environment:
+    DOCKER_REG: quay.io
+    DOCKER_REPOSITORY: quay.io/process_team
+
+# install dependencies
+dependencies:
+  override:
+    # docker-compose
+    - sudo pip install docker-compose
+
+    # since every command is run form within a new shell exportet varibles get lost
+    # the shell soruces $HOME/.circlerc beforse every execution, append commands to it
+    # to load varibles
+    # souces the varibles form the deploument config
+    - cat ./deployment.config >> $HOME/.circlerc
+    # set the git commit hash
+    - echo "export GIT_COMMIT=${CIRCLE_SHA1}" >> $HOME/.circlerc
+    # set the branch name
+    - echo "export GIT_BRANCH=${CIRCLE_BRANCH}" >> $HOME/.circlerc
+    # set the docker conainer tag wich is the branch name but / is replacesd with _
+    - echo "export CONTAINER_BRANCH_TAG=$(echo $CIRCLE_BRANCH | tr / _ | tr '[:upper:]' '[:lower:]')" >> $HOME/.circlerc
+    - echo "export CONTAINER_IMAGE=${DOCKER_REPOSITORY}/${PROJECT_NAME}" >> $HOME/.circlerc
+    - echo "export CONTAINER_IMAGE_TAGGED=${DOCKER_REPOSITORY}/${PROJECT_NAME}:${GIT_COMMIT}" >> $HOME/.circlerc
+    # set branch subdomain for development mode
+    - echo "export DEVELOPMENT_BRANCH_DOMAIN=$(echo $CIRCLE_BRANCH | tr / - | tr '[:upper:]' '[:lower:]')" >> $HOME/.circlerc
+
+    # show info about docker
+    - docker info
+    # show the docker vesion
+    - docker version
+
+    # login to the docker registry to push and pull non public imaegs
+    - docker login --username ${QUAY_USER} --email ${QUAY_MAIL} --password ${QUAY_PASS} quay.io
+
+# we use the test section do build the docker image and run unit tests
+# remember the docker file MUST HAVE the build arg RUN_TESTS defined
+# else the build will fail
+test:
+  override:
+    - docker build --build-arg="GIT_BRANCH=${GIT_BRANCH}" -t ${CONTAINER_IMAGE_TAGGED} ./
+
+# define the different deployments
+deployment:
+  # deploy every branch execpt for production on the development server (matched by regex)
+  development_hub:
+    branch: /^((?!production).)*$/
+
+    commands:
+      # set the development deployment target as DOMAIN (used inside the docker compose file)
+      - echo "export DOMAIN=${DEVELOPMENT_BRANCH_DOMAIN}.${DEVELOPMENT_DOMAIN}" >> $HOME/.circlerc
+      # set the service name
+      - echo "export SERVICE_NAME=$(echo $DOMAIN | tr . -)" >> $HOME/.circlerc
+
+      # FILES_DIR is the location where files are stored by the containers of this deployment
+      - echo "export FILES_DIR=${DATA_DIR}/files/${DOMAIN}" >> $HOME/.circlerc
+
+      # DATABASE_DIR is the location where databses store their files,
+      # this path is tuned for databse workloads
+      - echo "export DATABASE_DIR=${DATA_DIR}/databases/${DOMAIN}" >> $HOME/.circlerc
+
+      # the docker image was build with the git commit hash as tag
+      # now retag the image with the branch name
+      - docker tag ${CONTAINER_IMAGE_TAGGED} ${CONTAINER_IMAGE}:${CONTAINER_BRANCH_TAG}
+
+      # push both images to the registry
+      - docker push ${CONTAINER_IMAGE_TAGGED}
+      - docker push ${CONTAINER_IMAGE}:${CONTAINER_BRANCH_TAG}
+
+      # log the remote serve onto the registry to gain access to private images
+      - ssh ${DEVELOPMENT_TARGET} docker login --username ${QUAY_USER} --email ${QUAY_MAIL} --password ${QUAY_PASS} quay.io
+
+      # ssh dose not like environment varibles replace the varible inside the compose file with its actual value
+      - envsubst < docker-compose.yml > docker-compose-envs.yml
+
+      # crate a tmp dir
+      - echo "export COMPOSE_TMP=$(ssh ${DEVELOPMENT_TARGET} mktemp -d)" >> $HOME/.circlerc
+      # copy the compose file to the temp dir
+      - scp docker-compose-envs.yml ${DEVELOPMENT_TARGET}:${COMPOSE_TMP}/docker-compose.yml
+      # run the compose file
+      - ssh ${DEVELOPMENT_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} up -d
+      # scale up the deployment if necessary
+      - ssh ${DEVELOPMENT_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} scale ${DEVELOPMENT_SCALE}
+      # remove the tmp dir
+      - ssh ${DEVELOPMENT_TARGET} rm -r ${COMPOSE_TMP}
+
+  production_hub:
+    # deploy the production branch it is the same workflow as for the other branches only with some minor tweaks
+    branch: production
+
+    commands:
+      # set the porduction target
+      - echo "export DOMAIN=${PRODUCTION_DOMAIN}" >> $HOME/.circlerc
+      - echo "export SERVICE_NAME=$(echo $DOMAIN | tr . -)" >> $HOME/.circlerc
+
+      - echo "export FILES_DIR=${DATA_DIR}/files/${DOMAIN}" >> $HOME/.circlerc
+      - echo "export DATABASE_DIR=${DATA_DIR}/databases/${DOMAIN}" >> $HOME/.circlerc
+
+      - docker tag ${CONTAINER_IMAGE_TAGGED} ${CONTAINER_IMAGE}:${CONTAINER_BRANCH_TAG}
+
+      - docker push ${CONTAINER_IMAGE_TAGGED}
+      - docker push ${CONTAINER_IMAGE}:${CONTAINER_BRANCH_TAG}
+
+      - ssh ${PRODUCTION_TARGET} docker login --username ${QUAY_USER} --email ${QUAY_MAIL} --password ${QUAY_PASS} quay.io
+
+      - envsubst < docker-compose.yml > docker-compose-envs.yml
+
+      - echo "export COMPOSE_TMP=$(ssh ${PRODUCTION_TARGET} mktemp -d)" >> $HOME/.circlerc
+      - scp docker-compose-envs.yml ${PRODUCTION_TARGET}:${COMPOSE_TMP}/docker-compose.yml
+      - ssh ${PRODUCTION_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} up -d
+      - ssh ${PRODUCTION_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} scale ${DEVELOPMENT_SCALE}
+      - ssh ${PRODUCTION_TARGET} rm -r ${COMPOSE_TMP}

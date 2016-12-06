@@ -1,0 +1,52 @@
+{
+  "name": "ghostwriter-example",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build-backend": "babel src/backend --out-dir build/backend --source-maps --copy-files",
+    "build-watch-backend": "babel src/backend --out-dir build/backend --source-maps --copy-files --watch",
+    "build-frontend": "webpack --config ./webpack.config.js --progress --colors",
+    "build-watch-frontend": "webpack --config ./webpack.config.js --progress --colors --watch",
+    "build": "npm run build-backend && npm run build-frontend",
+    "start": "node build/backend/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/core-process/ghostwriter-example.git"
+  },
+  "author": "Niklas Salmoukas <niklas@salmoukas.com>",
+  "license": "SEE LICENSE IN license.md",
+  "bugs": {
+    "url": "https://github.com/core-process/ghostwriter-example/issues"
+  },
+  "homepage": "https://github.com/core-process/ghostwriter-example#readme",
+  "dependencies": {
+    "autoprefixer": "^6.3.1",
+    "babel-cli": "^6.11.4",
+    "babel-loader": "^6.2.2",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-runtime": "^6.12.0",
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-react": "^6.11.1",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-runtime": "^6.18.0",
+    "copy-webpack-plugin": "^3.0.1",
+    "css-loader": "^0.23.1",
+    "express": "^4.13.4",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.8.5",
+    "ghostwriter-apptool": "^1.0.7",
+    "ghostwriter-middleware": "^1.0.7",
+    "html-webpack-plugin": "^2.24.1",
+    "json-loader": "^0.5.4",
+    "morgan": "^1.7.0",
+    "postcss-loader": "^0.8.0",
+    "react": "^15.3.0",
+    "react-document-meta": "^2.0.3",
+    "react-dom": "^15.3.0",
+    "react-router": "^2.6.1",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.13"
+  }
+}

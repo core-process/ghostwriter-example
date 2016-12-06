@@ -1,0 +1,43 @@
+version: '2'
+
+networks:
+  backbone:
+    external: true
+
+services:
+  application:
+    image: ${CONTAINER_IMAGE_TAGGED}
+    depends_on:
+      - database
+    volumes:
+      - ${FILES_DIR}/application:/data
+    environment:
+      - GHOSTWRITER_APP_URL=http://application:8888
+      - GHOSTWRITER_SERVICE_URL=http://ghostwriter:8888
+    networks:
+      - default
+      - backbone
+    labels:
+      dcbridge.service: ${SERVICE_NAME}
+      dcbridge.port: "8888"
+      dcbridge.tags: DOMAIN:${DOMAIN},web
+    restart: unless-stopped
+
+  ghostwriter:
+    image: quay.io/process_team/ghostwriter-service:latest
+    depends_on:
+      - database
+      - application
+    environment:
+      - DATABASE_URI=mongodb://database:27017/ghostwriter
+    networks:
+      - default
+    restart: unless-stopped
+
+  database:
+    image: mongo:3
+    volumes:
+      - ${DATABASE_DIR}/mongodb:/data/db
+    networks:
+      - default
+    restart: unless-stopped
