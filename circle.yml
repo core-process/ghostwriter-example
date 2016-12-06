@@ -48,7 +48,7 @@ dependencies:
 # else the build will fail
 test:
   override:
-    - docker build --build-arg="GIT_BRANCH=${GIT_BRANCH}" -t ${CONTAINER_IMAGE_TAGGED} ./
+    - docker build -t ${CONTAINER_IMAGE_TAGGED} ./
 
 # define the different deployments
 deployment:
