@@ -6,6 +6,7 @@ import * as ghostwriter from 'ghostwriter-apptool';
 ghostwriter.setup('page');
 
 // setup and render app
+import { render } from 'react-dom';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import App from './app.js';
 import Page0 from './page0.js';
