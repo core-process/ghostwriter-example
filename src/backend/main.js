@@ -32,7 +32,6 @@ async function main(port) {
       process.env.APPLICATION_URL
         ? process.env.APPLICATION_URL
         : `http://localhost:${port}`,
-    retriesOnError: 0,
     fallbackOnError: true,
   }));
 
