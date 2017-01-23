@@ -9,11 +9,13 @@ services:
     image: ${CONTAINER_IMAGE_TAGGED}
     depends_on:
       - database
+      - ghostwriter
     volumes:
       - ${FILES_DIR}/application:/data
     environment:
-      - GHOSTWRITER_APP_URL=http://application:8888
-      - GHOSTWRITER_SERVICE_URL=http://ghostwriter:8888
+      - GIT_COMMIT=${GIT_COMMIT}
+      - APPLICATION_URL=http://application:8888
+      - GHOSTWRITER_URL=http://ghostwriter:8888
     networks:
       - default
       - backbone
@@ -27,7 +29,6 @@ services:
     image: quay.io/process_team/ghostwriter-service:latest
     depends_on:
       - database
-      - application
     environment:
       - DATABASE_URI=mongodb://database:27017/ghostwriter
     networks:

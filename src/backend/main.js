@@ -13,26 +13,26 @@ async function main(port) {
 
   // setup ghostwriter
   app.use(ghostwriter({
-    token: '147414e6-b941-48fb-a26a-7ace724129da',
+    token: 'ghostwriter-example',
+    version:
+      process.env.GIT_COMMIT
+        ? process.env.GIT_COMMIT
+        : ''+Date.now(),
     urlTest:
       (url) =>
            !url.startsWith('/~')
         &&  url != '/sitemap.xml'
         &&  url != '/favicon.ico'
         &&  url != '/robots.txt',
-    serviceUrl:
-      process.env.GHOSTWRITER_SERVICE_URL
-        ? process.env.GHOSTWRITER_SERVICE_URL
+    gwUrl:
+      process.env.GHOSTWRITER_URL
+        ? process.env.GHOSTWRITER_URL
         : 'http://localhost:8887',
-    baseUrl:
-      process.env.GHOSTWRITER_APP_URL
-        ? process.env.GHOSTWRITER_APP_URL
+    appUrl:
+      process.env.APPLICATION_URL
+        ? process.env.APPLICATION_URL
         : `http://localhost:${port}`,
-    sitemaps: [
-      process.env.GHOSTWRITER_APP_URL
-        ? process.env.GHOSTWRITER_APP_URL+'/sitemap.xml'
-        : `http://localhost:${port}/sitemap.xml`
-    ]
+    fallbackOnError: true,
   }));
 
   // frontend

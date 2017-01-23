@@ -54,7 +54,7 @@ test:
 deployment:
   # deploy every branch execpt for production on the development server (matched by regex)
   development_hub:
-    branch: /^((?!production).)*$/
+    branch: develop
 
     commands:
       # set the development deployment target as DOMAIN (used inside the docker compose file)
@@ -88,6 +88,7 @@ deployment:
       # copy the compose file to the temp dir
       - scp docker-compose-envs.yml ${DEVELOPMENT_TARGET}:${COMPOSE_TMP}/docker-compose.yml
       # run the compose file
+      - ssh ${DEVELOPMENT_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} pull
       - ssh ${DEVELOPMENT_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} up -d
       # scale up the deployment if necessary
       - ssh ${DEVELOPMENT_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} scale ${DEVELOPMENT_SCALE}
@@ -117,6 +118,7 @@ deployment:
 
       - echo "export COMPOSE_TMP=$(ssh ${PRODUCTION_TARGET} mktemp -d)" >> $HOME/.circlerc
       - scp docker-compose-envs.yml ${PRODUCTION_TARGET}:${COMPOSE_TMP}/docker-compose.yml
+      - ssh ${PRODUCTION_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} pull
       - ssh ${PRODUCTION_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} up -d
       - ssh ${PRODUCTION_TARGET} docker-compose -f ${COMPOSE_TMP}/docker-compose.yml -p ${DOMAIN} scale ${DEVELOPMENT_SCALE}
       - ssh ${PRODUCTION_TARGET} rm -r ${COMPOSE_TMP}

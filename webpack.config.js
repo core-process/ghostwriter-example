@@ -2,7 +2,7 @@ var webpack = require('webpack');
 var autoprefixer = require('autoprefixer');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+var HtmlWebpackPlugin = require('ghostwriter-html-webpack-plugin');
 var path = require('path');
 
 module.exports = {
@@ -15,7 +15,6 @@ module.exports = {
   },
 
   module: {
-    noParse: /node_modules\/json-schema\/lib\/validate\.js/,
     loaders: [
       { test: /\.jsx?$/, loader: 'babel', exclude: /node_modules/ },
       { test: /\.css$/, loader: ExtractTextPlugin.extract('style', ['css', 'postcss']) },
