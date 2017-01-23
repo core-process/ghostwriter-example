@@ -12,4 +12,6 @@ Ghostwriter prerenders your JavaScript website for search engines, SEO tools, so
 
 Ghostwriter is a replacement for the prerender.io service. In contrast to prerender.io, it does not limit serving of prerendered pages to a particular set of spiders. Quite the contrary, it serves prerendered pages to all crawlers and browsers. Therefore Ghostwriter should NOT be vulnerable to accidental cloaking.
 
-This is a complete example based on React. You will find the project itself here: https://github.com/core-process/ghostwriter
+This is a complete example based on React. You will find a deployed version of this example here: https://ghostwriter-example.process.space/
+
+You will find the project itself here: https://github.com/core-process/ghostwriter
