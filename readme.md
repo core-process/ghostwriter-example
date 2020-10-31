@@ -14,4 +14,4 @@ Ghostwriter is a replacement for the prerender.io service. In contrast to preren
 
 This is a complete example based on React. You will find a deployed version of this example here: https://ghostwriter-example.process.space/
 
-You will find the project itself here: https://github.com/core-process/ghostwriter
+You will find the project itself here: https://github.com/coreprocess/ghostwriter

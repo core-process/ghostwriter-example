@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/core-process/ghostwriter-example.git"
+    "url": "git+https://github.com/coreprocess/ghostwriter-example.git"
   },
   "author": "Niklas Salmoukas <niklas@salmoukas.com>",
   "license": "SEE LICENSE IN license.md",
   "bugs": {
-    "url": "https://github.com/core-process/ghostwriter-example/issues"
+    "url": "https://github.com/coreprocess/ghostwriter-example/issues"
   },
-  "homepage": "https://github.com/core-process/ghostwriter-example#readme",
+  "homepage": "https://github.com/coreprocess/ghostwriter-example#readme",
   "dependencies": {
     "autoprefixer": "^6.7.0",
     "babel-cli": "^6.22.2",
